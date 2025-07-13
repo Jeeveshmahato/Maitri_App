@@ -9,10 +9,12 @@ import "moment-timezone";
 
 const Chat = () => {
   const { userID } = useParams();
-  console.log(userID);
+  console.log("Chat userID:", userID);
   const [message, setMessage] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const loginuser = useSelector((s) => s?.userAuth?.loginDetails);
+  
+  console.log("Login user data:", loginuser);
   const fetchChatMessages = async () => {
     const chat = await axios.get(BaseUrl + "/chat/" + userID, {
       withCredentials: true,
@@ -33,29 +35,52 @@ const Chat = () => {
     fetchChatMessages();
   }, []);
 
+  const [socket, setSocket] = useState(null);
+
   useEffect(() => {
     if (!loginuser._id) return;
-    const socket = createSocketConnection();
-    socket.emit("joinChat", {
+    
+    const newSocket = createSocketConnection();
+    setSocket(newSocket);
+    
+    newSocket.emit("joinChat", {
       firstName: loginuser.firstName,
       userId: loginuser._id,
       targetUserId: userID,
     });
-    socket.on("messageReceived", ({ firstName, lastName, text, img_Url }) => {
-      console.log(firstName + " : " + text);
+    
+    newSocket.on("messageReceived", ({ firstName, lastName, text, img_Url }) => {
+      console.log("Received message:", { firstName, lastName, text, img_Url });
       setMessage((prevMessages) => [
         ...prevMessages,
         { firstName, lastName, text, img_Url },
       ]);
-      console.log(sendMessage)
     });
+    
     return () => {
-      socket.disconnect();
+      newSocket.disconnect();
     };
   }, [userID, loginuser?._id]);
 
   const sendMessage = () => {
-    const socket = createSocketConnection();
+    if (!socket || !newMessage.trim() || !loginuser._id) {
+      console.log("Cannot send message:", { 
+        socket: !!socket, 
+        message: newMessage.trim(), 
+        userId: loginuser._id 
+      });
+      return;
+    }
+    
+    console.log("Sending message with user data:", {
+      firstName: loginuser.firstName,
+      lastName: loginuser.lastName,
+      userId: loginuser._id,
+      targetUserId: userID,
+      text: newMessage,
+      img_Url: loginuser.img_Url,
+    });
+    
     socket.emit("sendMessage", {
       firstName: loginuser.firstName,
       lastName: loginuser.lastName,
