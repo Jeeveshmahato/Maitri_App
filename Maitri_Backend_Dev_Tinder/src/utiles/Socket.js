@@ -17,6 +17,7 @@ const initailizeSocket = (server) => {
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Cookie"],
     },
+    path: "/socket.io"
   });
   io.on("connection", (socket) => {
     socket.on("joinChat", ({ firstName, userId, targetUserId }) => {
