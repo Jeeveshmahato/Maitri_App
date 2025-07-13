@@ -15,10 +15,13 @@ const initailizeSocket = require("./utiles/Socket");
 const chatRouter = require("./Routes/chat");
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.NODE_ENV === "production" 
+      ? ["https://maitri-app-frontend.onrender.com", "http://localhost:5173"]
+      : "http://localhost:5173",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Cookie"],
+    exposedHeaders: ["Set-Cookie"],
   })
 );
 app.use(express.json());
