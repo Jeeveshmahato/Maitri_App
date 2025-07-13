@@ -4,6 +4,23 @@ const { userAuth } = require("../middleware/auth.js");
 const { validateEditCheck } = require("../utiles/validation.js");
 const bcrypt = require("bcrypt");
 
+// Handle preflight OPTIONS requests for profile routes
+profileRouter.options("/profile/edit", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "https://maitri-app-frontend.onrender.com");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Cookie");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.status(204).end();
+});
+
+profileRouter.options("/profile/editpassword", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "https://maitri-app-frontend.onrender.com");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Cookie");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.status(204).end();
+});
+
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     const user = req.user;

@@ -24,13 +24,27 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Cookie"],
   exposedHeaders: ["Set-Cookie"],
   preflightContinue: false,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 204,
+  maxAge: 86400 // Cache preflight response for 24 hours
 };
 
 app.use(cors(corsOptions));
 
+// Global OPTIONS handler for preflight requests
+app.options('*', (req, res) => {
+  res.header("Access-Control-Allow-Origin", process.env.NODE_ENV === "production" 
+    ? "https://maitri-app-frontend.onrender.com" 
+    : "http://localhost:5173");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Cookie");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Max-Age", "86400");
+  res.status(204).end();
+});
+
 // Debug middleware for CORS
 app.use((req, res, next) => {
+  console.log(`[CORS] NODE_ENV: ${process.env.NODE_ENV}`);
   console.log(`[CORS] ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
   if (req.method === 'OPTIONS') {
     console.log('[CORS] Preflight request detected');
@@ -38,8 +52,16 @@ app.use((req, res, next) => {
   }
   next();
 });
+// Apply CORS before any route handlers
 app.use(express.json());
 app.use(cookieParser());
+
+// Test route to verify CORS
+app.get("/test-cors", (req, res) => {
+  res.json({ message: "CORS is working", timestamp: new Date().toISOString() });
+});
+
+// Apply routes after CORS middleware
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", connectionRouter);
