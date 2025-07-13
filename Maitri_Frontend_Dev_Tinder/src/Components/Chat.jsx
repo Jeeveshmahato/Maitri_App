@@ -15,13 +15,23 @@ const Chat = () => {
   const loginuser = useSelector((s) => s?.userAuth?.loginDetails);
   
   console.log("Login user data:", loginuser);
+  console.log("Login user fields:", {
+    firstName: loginuser?.firstName,
+    lastName: loginuser?.lastName,
+    img_Url: loginuser?.img_Url,
+    _id: loginuser?._id
+  });
   const fetchChatMessages = async () => {
     const chat = await axios.get(BaseUrl + "/chat/" + userID, {
       withCredentials: true,
     });
     console.log(chat.data.messages);
     const chatMessages = chat?.data.messages.map((msg) => {
-      const { senderId, text, firstName, lastName, img_Url } = msg;
+      const { senderId, text } = msg;
+      // Extract user data from populated senderId
+      const firstName = senderId?.firstName || 'Unknown';
+      const lastName = senderId?.lastName || 'User';
+      const img_Url = senderId?.img_Url || '';
       return {
         firstName,
         lastName,
@@ -49,8 +59,10 @@ const Chat = () => {
       targetUserId: userID,
     });
     
-    newSocket.on("messageReceived", ({ firstName, lastName, text, img_Url }) => {
-      console.log("Received message:", { firstName, lastName, text, img_Url });
+    newSocket.on("messageReceived", (messageData) => {
+      console.log("Received message data:", messageData);
+      const { firstName, lastName, text, img_Url } = messageData;
+      console.log("Extracted user data:", { firstName, lastName, text, img_Url });
       setMessage((prevMessages) => [
         ...prevMessages,
         { firstName, lastName, text, img_Url },

@@ -1,4 +1,5 @@
 require("dotenv").config();
+require("./config/environment"); // Load environment defaults for local development
 
 const express = require("express");
 var cookieParser = require("cookie-parser");

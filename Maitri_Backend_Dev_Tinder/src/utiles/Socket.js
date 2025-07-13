@@ -50,6 +50,7 @@ const initailizeSocket = (server) => {
             text,
           });
           await chat.save();
+          console.log("Emitting message with user data:", { firstName, lastName, text, img_Url });
           io.to(roomId).emit("messageReceived", { firstName, lastName, text, img_Url });
         } catch (error) {
           console.log(error);

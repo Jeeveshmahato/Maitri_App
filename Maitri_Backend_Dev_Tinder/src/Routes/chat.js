@@ -15,7 +15,7 @@ chatRouter.get(
         participants: { $all: [userId, targetUserId] },
       }).populate({
         path: "messages.senderId",
-        select: "firstname lastname",
+        select: "firstName lastName img_Url",
       });
       if (!chat) {
         chat = new Chat({
