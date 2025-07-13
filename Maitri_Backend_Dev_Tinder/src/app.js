@@ -16,9 +16,20 @@ const initailizeSocket = require("./utiles/Socket");
 const chatRouter = require("./Routes/chat");
 // CORS configuration with debugging
 const corsOptions = {
-  origin: process.env.NODE_ENV === "production" 
-    ? ["https://maitri-app-frontend.onrender.com", "http://localhost:5173"]
-    : "http://localhost:5173",
+  origin: function (origin, callback) {
+    const allowedOrigins = process.env.NODE_ENV === "production" 
+      ? ["https://maitri-app-frontend.onrender.com", "http://localhost:5173"]
+      : ["http://localhost:5173"];
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Cookie"],
@@ -30,11 +41,34 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Additional CORS middleware to ensure all headers are set
+app.use((req, res, next) => {
+  const origin = process.env.NODE_ENV === "production" 
+    ? "https://maitri-app-frontend.onrender.com" 
+    : "http://localhost:5173";
+  
+  res.header("Access-Control-Allow-Origin", origin);
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Cookie");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Max-Age", "86400");
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+  
+  next();
+});
+
 // Global OPTIONS handler for preflight requests
 app.options('*', (req, res) => {
-  res.header("Access-Control-Allow-Origin", process.env.NODE_ENV === "production" 
+  const origin = process.env.NODE_ENV === "production" 
     ? "https://maitri-app-frontend.onrender.com" 
-    : "http://localhost:5173");
+    : "http://localhost:5173";
+  
+  res.header("Access-Control-Allow-Origin", origin);
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Cookie");
   res.header("Access-Control-Allow-Credentials", "true");
