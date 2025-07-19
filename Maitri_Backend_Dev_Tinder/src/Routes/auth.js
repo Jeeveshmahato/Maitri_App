@@ -3,6 +3,8 @@ const authRouter = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../Model/User");
 
+const isProduction = process.env.NODE_ENV === "production";
+
 authRouter.post("/signup", async (req, res) => {
   
   try {
@@ -23,8 +25,8 @@ authRouter.post("/signup", async (req, res) => {
     res.cookie("token", token, {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // cookies expires in 7 days
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
     });
     res.json({ message: "user login sucessfully created", data: saveUser });
   } catch (error) {
@@ -50,8 +52,8 @@ authRouter.post("/login", async (req, res) => {
     res.cookie("token", token, {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // cookies expires in 7 days
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
     });
     res.send(finduser);
   } catch (error) {
@@ -62,8 +64,8 @@ authRouter.post("/logout", (req, res) => {
   res.cookie("token", "", { 
     expires: new Date(0),
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   });
   res.send("Logged out Successfully");
 });

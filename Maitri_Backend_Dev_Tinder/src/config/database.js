@@ -5,14 +5,14 @@ const connectDB = async () => {
     console.log('Environment variables:');
     console.log('NODE_ENV:', process.env.NODE_ENV);
     console.log('PORT:', process.env.PORT);
-    console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
+    console.log('DB_CONNECTION_SECRET exists:', !!process.env.DB_CONNECTION_SECRET);
     console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
     
-    if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI environment variable is not set');
+    if (!process.env.DB_CONNECTION_SECRET) {
+      throw new Error('DB_CONNECTION_SECRET environment variable is not set');
     }
     
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(process.env.DB_CONNECTION_SECRET);
     console.log('MongoDB Connected Successfully');
   } catch (error) {
     console.error('MongoDB Connection Error:', error.message);

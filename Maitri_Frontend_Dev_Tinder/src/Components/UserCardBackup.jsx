@@ -35,7 +35,7 @@ const UserCardBackup = ({ users, showButton }) => {
         <div className="card-body">
           <h2 className="card-title">{firstName + " " + lastName}</h2>
           <p>{age + " " + gender}</p>
-          <div className="flex gap-2.5">
+          <div className="flex gap-2.5 flex-wrap justify-center items-center">
             {skills &&
               skills.map((skill) => {
                 return <span key={skill}>{skill}</span>;

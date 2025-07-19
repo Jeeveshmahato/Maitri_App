@@ -14,18 +14,17 @@ const http = require("http");
 const cors = require("cors");
 const initailizeSocket = require("./utiles/Socket");
 const chatRouter = require("./Routes/chat");
-// CORS configuration with debugging
+
+// CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = process.env.NODE_ENV === "production" 
       ? ["https://maitri-app-frontend.onrender.com", "http://localhost:5173"]
       : ["http://localhost:5173"];
-    
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
+    if (!origin) return callback(null, allowedOrigins[0]);
     if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
+      callback(null, origin); // Return the origin string, not true
     } else {
       callback(new Error('Not allowed by CORS'));
     }
@@ -39,56 +38,37 @@ const corsOptions = {
   maxAge: 86400 // Cache preflight response for 24 hours
 };
 
-app.use(cors(corsOptions));
-
-// Additional CORS middleware to ensure all headers are set
-app.use((req, res, next) => {
-  const origin = process.env.NODE_ENV === "production" 
-    ? "https://maitri-app-frontend.onrender.com" 
-    : "http://localhost:5173";
-  
-  res.header("Access-Control-Allow-Origin", origin);
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Cookie");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Max-Age", "86400");
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(204).end();
-    return;
-  }
-  
-  next();
-});
-
-// Global OPTIONS handler for preflight requests
-app.options('*', (req, res) => {
-  const origin = process.env.NODE_ENV === "production" 
-    ? "https://maitri-app-frontend.onrender.com" 
-    : "http://localhost:5173";
-  
-  res.header("Access-Control-Allow-Origin", origin);
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Cookie");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Max-Age", "86400");
-  res.status(204).end();
-});
-
-// Debug middleware for CORS
-app.use((req, res, next) => {
-  console.log(`[CORS] NODE_ENV: ${process.env.NODE_ENV}`);
-  console.log(`[CORS] ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
-  if (req.method === 'OPTIONS') {
-    console.log('[CORS] Preflight request detected');
-    console.log('[CORS] Request headers:', req.headers);
-  }
-  next();
-});
 // Apply CORS before any route handlers
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+
+// Debug outgoing headers for OPTIONS requests
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    const oldSend = res.send;
+    res.send = function (body) {
+      console.log('--- OPTIONS Response Headers ---');
+      console.log(res.getHeaders());
+      console.log('-------------------------------');
+      oldSend.call(this, body);
+    };
+  }
+  next();
+});
+
+// Debug middleware for OPTIONS requests
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    console.log('--- OPTIONS Preflight Debug ---');
+    console.log('Path:', req.path);
+    console.log('Origin:', req.headers.origin);
+    console.log('Access-Control-Request-Method:', req.headers['access-control-request-method']);
+    console.log('Access-Control-Request-Headers:', req.headers['access-control-request-headers']);
+    console.log('-------------------------------');
+  }
+  next();
+});
 
 // Test route to verify CORS
 app.get("/test-cors", (req, res) => {
