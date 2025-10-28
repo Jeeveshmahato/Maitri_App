@@ -44,10 +44,10 @@ const Connections = () => {
                 </figure>
                 <div className="card-body items-center text-center">
                   <h2 className="card-title">{firstName + " " + lastName}</h2>
-                  <div className=" flex gap-3">
+                  <div className=" flex gap-3 flex-wrap">
                     {skills &&
                       skills.map((skill) => (
-                        <span key={skill} className="badge badge-primary">
+                        <span key={skill} className="badge h-fit w-fit badge-primary">
                           {skill}
                         </span>
                       ))}

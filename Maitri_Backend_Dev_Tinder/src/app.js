@@ -38,37 +38,29 @@ const corsOptions = {
   maxAge: 86400 // Cache preflight response for 24 hours
 };
 
-// Apply CORS before any route handlers
+// Explicitly handle OPTIONS requests for CORS preflight
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = process.env.NODE_ENV === "production" 
+    ? ["https://maitri-app-frontend.onrender.com", "http://localhost:5173"]
+    : ["http://localhost:5173"];
+  
+  if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    res.setHeader('Access-Control-Allow-Origin', origin || allowedOrigins[0]);
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Cookie');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Max-Age', '86400');
+  }
+  res.sendStatus(204);
+});
+
+// Apply CORS middleware
 app.use(cors(corsOptions));
+
+// Parse request bodies after CORS
 app.use(express.json());
 app.use(cookieParser());
-
-// Debug outgoing headers for OPTIONS requests
-app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    const oldSend = res.send;
-    res.send = function (body) {
-      console.log('--- OPTIONS Response Headers ---');
-      console.log(res.getHeaders());
-      console.log('-------------------------------');
-      oldSend.call(this, body);
-    };
-  }
-  next();
-});
-
-// Debug middleware for OPTIONS requests
-app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    console.log('--- OPTIONS Preflight Debug ---');
-    console.log('Path:', req.path);
-    console.log('Origin:', req.headers.origin);
-    console.log('Access-Control-Request-Method:', req.headers['access-control-request-method']);
-    console.log('Access-Control-Request-Headers:', req.headers['access-control-request-headers']);
-    console.log('-------------------------------');
-  }
-  next();
-});
 
 // Test route to verify CORS
 app.get("/test-cors", (req, res) => {

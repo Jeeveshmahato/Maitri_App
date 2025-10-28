@@ -3,7 +3,7 @@ const { userAuth } = require("../middleware/auth");
 const connectionRequestModel = require("../Model/connectionRequest");
 const User = require("../Model/User");
 const userRequest = express.Router();
-const Save_data = "firstName lastName skills age gender img_Url";
+const Save_data = "firstName lastName skills age gender img_Url isPremium";
 
 userRequest.get("/userrequest/pending", userAuth, async (req, res) => {
   try {
@@ -53,7 +53,7 @@ userRequest.get("/userrequest/accepted", userAuth, async (req, res) => {
 });
 userRequest.get("/feed", userAuth, async (req, res) => {
   try {
-    const pageno = req.query.pageno || 1;
+    const pageno = req.query.page || req.query.pageno || 1;
     let limit = req.query.limit || 5;
     // const pageno = req.query.pageno;
     // let limit = req.query.limit;

@@ -89,7 +89,7 @@ const UserCard = ({ user, onSwipe }) => {
             </p>
             <div className="flex flex-wrap gap-2 my-2">
               {skills?.map((skill) => (
-                <span key={skill} className="badge badge-outline">
+                <span key={skill} className="badge w-fit h-fit badge-outline">
                   {skill}
                 </span>
               ))}
